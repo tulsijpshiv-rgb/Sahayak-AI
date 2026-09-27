@@ -1,0 +1,22 @@
+{
+  "id": "pmjjby",
+  "name": "PM Jeevan Jyoti Bima Yojana",
+  "full_name": "Pradhan Mantri Jeevan Jyoti Bima Yojana",
+  "description": "Life insurance cover for bank account holders aged 18 to 50",
+  "eligibility_conditions": [
+    {"field": "age", "operator": "gte", "value": 18},
+    {"field": "age", "operator": "lte", "value": 50},
+    {"field": "has_bank_account", "operator": "equals", "value": true}
+  ],
+  "required_documents": ["Aadhaar card", "Bank account details"],
+  "monthly_benefit": 0,
+  "benefit_description": "Rs 2 lakh life insurance cover for family",
+  "annual_premium": 436,
+  "action": "Enroll at any bank branch",
+  "office": "Any nationalized bank",
+  "portal": "jansuraksha.gov.in",
+  "official_source": "Ministry of Finance, Government of India",
+  "source_url": "https://jansuraksha.gov.in",
+  "deadline": "Renews every June 1st",
+  "urgency": "medium"
+}

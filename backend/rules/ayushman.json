@@ -1,0 +1,21 @@
+{
+  "id": "ayushman_bharat",
+  "name": "Ayushman Bharat PM-JAY",
+  "full_name": "Pradhan Mantri Jan Arogya Yojana",
+  "description": "Health insurance cover of Rs 5 lakh per year for construction workers and daily wage labourers",
+  "eligibility_conditions": [
+    {"field": "occupation", "operator": "contains", "value": "construction"},
+    {"field": "existing_documents", "operator": "contains", "value": "e-Shram"}
+  ],
+  "required_documents": ["e-Shram card", "Aadhaar card"],
+  "monthly_benefit": 0,
+  "benefit_description": "Rs 5 lakh per year health cover for entire family at empanelled hospitals",
+  "annual_benefit": 500000,
+  "action": "Check eligibility at mera.pmjay.gov.in or call 14555",
+  "office": "National Health Authority or nearest empanelled hospital",
+  "portal": "mera.pmjay.gov.in",
+  "official_source": "National Health Authority, Government of India",
+  "source_url": "https://pmjay.gov.in",
+  "deadline": null,
+  "urgency": "high"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "bocw_karnataka",
+  "name": "BOCW Karnataka",
+  "full_name": "Building and Other Construction Workers Welfare Board Karnataka",
+  "description": "Welfare benefits for construction workers registered in Karnataka including accident insurance, education scholarships, and medical coverage",
+  "eligibility_conditions": [
+    {"field": "occupation", "operator": "contains", "value": "construction"},
+    {"field": "current_state", "operator": "equals", "value": "Karnataka"},
+    {"field": "months_in_current_state", "operator": "gte", "value": 6}
+  ],
+  "required_documents": ["Aadhaar card", "Passport photo", "Wage slip or employer certificate"],
+  "monthly_benefit": 4800,
+  "benefit_description": "Accident insurance + education scholarship + medical coverage combined",
+  "annual_benefit": 57600,
+  "action": "Register at kbocwwb.karnataka.gov.in or visit nearest BOCW office",
+  "office": "Karnataka Building and Other Construction Workers Welfare Board",
+  "portal": "kbocwwb.karnataka.gov.in",
+  "official_source": "Karnataka BOCW Act 1996 and Karnataka BOCW Rules 2006",
+  "source_url": "https://kbocwwb.karnataka.gov.in",
+  "deadline": null,
+  "urgency": "high"
+}
