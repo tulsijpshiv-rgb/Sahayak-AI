@@ -1,0 +1,21 @@
+{
+  "id": "bocw_complaint",
+  "name": "BOCW Contractor Complaint",
+  "full_name": "Complaint Against Unregistered Contractor under BOCW Act",
+  "description": "Legal right to file complaint if contractor employs 10 or more construction workers and has not registered them under BOCW",
+  "eligibility_conditions": [
+    {"field": "occupation", "operator": "contains", "value": "construction"},
+    {"field": "contractor_registered_bocw", "operator": "equals", "value": false},
+    {"field": "current_state", "operator": "equals", "value": "Karnataka"}
+  ],
+  "required_documents": ["Aadhaar card", "Proof of employment at the site"],
+  "monthly_benefit": 0,
+  "benefit_description": "Contractor faces fine up to Rs 1 lakh and worker gets registered under BOCW",
+  "action": "File complaint at District Labour Office, Bengaluru",
+  "office": "District Labour Office, Bengaluru Urban",
+  "portal": "kbocwwb.karnataka.gov.in",
+  "official_source": "Building and Other Construction Workers Act 1996, Section 7",
+  "source_url": "https://kbocwwb.karnataka.gov.in",
+  "deadline": null,
+  "urgency": "high"
+}

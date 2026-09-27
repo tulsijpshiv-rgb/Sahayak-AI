@@ -1,0 +1,22 @@
+{
+  "id": "griha_lakshmi",
+  "name": "Griha Lakshmi Karnataka",
+  "full_name": "Gruha Lakshmi Scheme Karnataka",
+  "description": "Monthly financial assistance for female heads of household in Karnataka",
+  "eligibility_conditions": [
+    {"field": "current_state", "operator": "equals", "value": "Karnataka"},
+    {"field": "gender", "operator": "equals", "value": "female"},
+    {"field": "existing_documents", "operator": "contains", "value": "ration card"},
+    {"field": "is_head_of_household", "operator": "equals", "value": true}
+  ],
+  "required_documents": ["Aadhaar card", "Ration card", "Bank account details"],
+  "monthly_benefit": 2000,
+  "benefit_description": "Rs 2000 per month direct benefit transfer",
+  "action": "Apply at sevasindhu.karnataka.gov.in or nearest Bangalore One centre",
+  "office": "Seva Sindhu Karnataka or Bangalore One",
+  "portal": "sevasindhu.karnataka.gov.in",
+  "official_source": "Government of Karnataka",
+  "source_url": "https://sevasindhu.karnataka.gov.in",
+  "deadline": null,
+  "urgency": "medium"
+}
