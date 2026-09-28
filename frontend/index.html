@@ -1167,8 +1167,31 @@
   }
 
   async function generateComplaint(){
-    try{const res=await fetch('/generate-complaint',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:currentProfile.name||'Worker',months_in_current_state:currentProfile.months_in_current_state||'several'})});const data=await res.json();if(data.url)window.open(data.url,'_blank');}
-    catch(e){alert('Could not generate complaint letter.');}
+    try {
+      const res = await fetch('/generate-complaint', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          name: currentProfile.name || 'Worker',
+          months_in_current_state: String(currentProfile.months_in_current_state || 'several')
+        })
+      });
+      const data = await res.json();
+      console.log('Complaint response:', data);
+      if (data.url) {
+        const a = document.createElement('a');
+        a.href = data.url;
+        a.target = '_blank';
+        a.download = 'complaint_letter.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+      }
+    } catch(e) {
+      alert('Could not generate complaint letter: ' + e.message);
+    }
   }
 </script>
 </body>
