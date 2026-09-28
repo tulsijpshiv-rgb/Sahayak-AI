@@ -4,161 +4,579 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SahayakAI — Migrant Worker Welfare Agent</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Cormorant+Garamond:wght@500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
   <style>
+    /* ── Palette — Deeper Purple & White ──
+       #4A2C8A  deep violet     (title bar, darkest)
+       #5E35B1  strong purple   (primary buttons)
+       #7B52C8  vivid purple    (accents, hover)
+       #9C7FD4  medium purple   (borders)
+       #C4AAEC  soft lilac      (lighter borders)
+       #EDE4FF  lavender tint   (card bg)
+    */
+    :root {
+      --lavender:   #EDE4FF;
+      --lilac:      #C4AAEC;
+      --purple:     #7B52C8;
+      --near-white: #F3EEFF;
+      --plum:       #2D1B69;
+      --plum-mid:   #4A2C8A;
+      --plum-light: #6B4FAF;
+      --red:        #c0392b;
+      --red-light:  rgba(192,57,43,0.09);
+      --green:      #1a7a4a;
+      --gold:       #E8A03C;
+      --brand-gradient: linear-gradient(120deg, #3A2070, #5E35B1, #A94FC7, #D26BB3, #8B5FE0, #4A2C8A, #3A2070);
+    }
+
+    @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #0f1117; color: #e8eaf0; min-height: 100vh; }
 
-    /* Header */
-    header { background: #1a1f2e; border-bottom: 1px solid #2a2f3e; padding: 20px 32px; display: flex; align-items: center; gap: 16px; }
-    .logo { width: 36px; height: 36px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .header-text h1 { font-size: 20px; font-weight: 700; color: #fff; }
-    .header-text p { font-size: 12px; color: #6b7280; margin-top: 2px; }
-    .sovereign-badge { margin-left: auto; background: #1e3a2f; color: #34d399; border: 1px solid #34d399; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+    body {
+      font-family: 'DM Sans', 'Segoe UI', sans-serif;
+      background:
+        radial-gradient(ellipse 900px 520px at 8% -8%, rgba(123,82,200,0.13), transparent 60%),
+        radial-gradient(ellipse 760px 560px at 105% 2%, rgba(196,170,236,0.22), transparent 58%),
+        radial-gradient(ellipse 820px 640px at 50% 112%, rgba(237,228,255,0.65), transparent 62%),
+        #fdfcff;
+      background-attachment: fixed;
+      color: var(--plum);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
 
-    main { max-width: 860px; margin: 32px auto; padding: 0 20px 60px; }
+    body > * { position: relative; z-index: 1; }
 
-    /* Sovereignty panel */
-    .sovereignty-panel { background: #111827; border: 1px solid #1e3a2f; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: none; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .input-card, .chat-card.visible, .rupee-counter.visible, .profile-card.visible,
+    .contractor-alert.visible, .schemes-section.visible .scheme-card, .ineligible-section.visible,
+    .sovereignty-panel.visible {
+      animation: fadeInUp 0.5s cubic-bezier(.2,.8,.2,1) both;
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--lilac); border-radius: 8px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--purple); }
+
+    /* ── Header ── */
+    header {
+      background: var(--brand-gradient);
+      background-size: 300% 300%;
+      animation: gradientShift 12s ease infinite;
+      border-bottom: none;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 24px rgba(42,16,100,0.40);
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle 220px at 15% -40%, rgba(255,255,255,0.10), transparent 60%),
+        radial-gradient(circle 260px at 85% 140%, rgba(255,255,255,0.08), transparent 60%);
+      pointer-events: none;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(232,160,60,0.7), rgba(210,107,179,0.85), rgba(196,170,236,0.9), rgba(232,160,60,0.7), transparent);
+      background-size: 200% 100%;
+      animation: gradientShift 5s linear infinite;
+      pointer-events: none;
+    }
+    header, header * { position: relative; z-index: 1; }
+
+    /* ── Logo ── */
+    .logo {
+      width: 92px; height: 92px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #8B5FE0, #3A2070);
+      border-radius: 22px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.38), 0 0 0 0 rgba(232,160,60,0.45);
+      animation: logoGlow 3.2s ease-in-out infinite;
+      transition: transform 0.25s ease;
+    }
+    .logo:hover { transform: scale(1.05) rotate(-2deg); }
+    .logo svg { width: 60px; height: 60px; }
+    @keyframes logoGlow {
+      0%, 100% { box-shadow: 0 6px 24px rgba(0,0,0,0.38), 0 0 0 0 rgba(232,160,60,0.40); }
+      50% { box-shadow: 0 6px 26px rgba(0,0,0,0.42), 0 0 0 12px rgba(232,160,60,0); }
+    }
+
+    .header-text h1 {
+      font-family: 'Baloo 2', cursive;
+      font-size: 38px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 0.01em;
+      line-height: 1.1;
+      text-shadow: 0 2px 14px rgba(0,0,0,0.25);
+    }
+    .header-text p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: rgba(255,255,255,0.75);
+      margin-top: 3px;
+      letter-spacing: 0.02em;
+    }
+
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+    /* ── Language toggle ── */
+    .lang-toggle {
+      display: flex;
+      align-items: center;
+      background: var(--lavender);
+      border: 1.5px solid var(--lilac);
+      border-radius: 24px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .lang-btn {
+      padding: 6px 15px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--plum-light);
+      transition: all 0.2s;
+      letter-spacing: 0.03em;
+    }
+    .lang-btn.active {
+      background: linear-gradient(135deg, #7B52C8, #3A2070);
+      color: #fff;
+      border-radius: 22px;
+      box-shadow: 0 2px 10px rgba(58,32,112,0.30);
+    }
+
+    .sovereign-badge {
+      background: rgba(255,255,255,0.14);
+      color: #ffffff;
+      border: 1.5px solid rgba(255,255,255,0.30);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+      letter-spacing: 0.02em;
+    }
+    .sovereign-badge:hover { background: rgba(255,255,255,0.24); }
+
+    main { max-width: 1100px; margin: 36px auto; padding: 0 32px 72px; }
+
+    /* ── Sovereignty panel ── */
+    .sovereignty-panel {
+      background: rgba(246,242,255,0.95);
+      border: 1.5px solid var(--lilac);
+      border-radius: 14px;
+      padding: 26px 30px;
+      margin-bottom: 28px;
+      display: none;
+      box-shadow: 0 2px 14px rgba(169,139,227,0.08);
+    }
     .sovereignty-panel.visible { display: block; }
-    .sovereignty-panel h3 { font-size: 12px; color: #34d399; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
+    .sovereignty-panel h3 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: #5E35B1;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
     .sovereignty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .sovereignty-item { font-size: 12px; }
-    .sovereignty-item .label { color: #6b7280; margin-bottom: 3px; }
-    .sovereignty-item .value { color: #e8eaf0; }
-    .sovereignty-item .value.safe { color: #34d399; }
-    .sovereignty-item .value.sent { color: #fbbf24; }
+    .sovereignty-item { font-size: 16px; }
+    .sovereignty-item .label { color: var(--plum-light); margin-bottom: 3px; font-weight: 500; }
+    .sovereignty-item .value { color: var(--plum); font-weight: 600; }
+    .sovereignty-item .value.safe { color: var(--green); }
+    .sovereignty-item .value.sent { color: #b07d10; }
 
-    /* Mode toggle */
+    /* ── Mode toggle ── */
     .mode-toggle { display: flex; gap: 8px; margin-bottom: 24px; }
-    .mode-btn { flex: 1; padding: 12px; border: 1px solid #2a2f3e; background: #1a1f2e; color: #9ca3af; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; }
-    .mode-btn.active { background: #6366f1; color: #fff; border-color: #6366f1; }
+    .mode-btn {
+      flex: 1;
+      padding: 17px 22px;
+      border: 1.5px solid var(--lilac);
+      background: var(--near-white);
+      color: var(--plum-light);
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      transition: all 0.2s;
+      box-shadow: 0 1px 4px rgba(169,139,227,0.07);
+    }
+    .mode-btn:hover { border-color: #5E35B1; color: var(--plum); transform: translateY(-1px); }
+    .mode-btn.active {
+      background: var(--brand-gradient);
+      background-size: 300% 300%;
+      animation: gradientShift 6s ease infinite;
+      color: #fff;
+      border-color: transparent;
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(58,32,112,0.32);
+      transform: translateY(-1px);
+      position: relative;
+      overflow: hidden;
+    }
+    .mode-btn, .btn-primary, .btn-send { position: relative; overflow: hidden; }
+    .mode-btn.active::before, .btn-primary::before, .btn-send::before {
+      content: '';
+      position: absolute; top: 0; left: -75%; width: 45%; height: 100%;
+      background: linear-gradient(115deg, transparent, rgba(255,255,255,0.45), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.65s ease;
+      pointer-events: none;
+    }
+    .mode-btn.active:hover::before, .btn-primary:hover::before, .btn-send:hover::before { left: 135%; }
 
-    /* Input card */
-    .input-card { background: #1a1f2e; border: 1px solid #2a2f3e; border-radius: 16px; padding: 28px; margin-bottom: 24px; }
-    .input-card h2 { font-size: 13px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
-    textarea { width: 100%; background: #0f1117; border: 1px solid #2a2f3e; border-radius: 10px; color: #e8eaf0; font-size: 15px; padding: 14px; resize: vertical; min-height: 110px; font-family: inherit; line-height: 1.6; }
-    textarea:focus { outline: none; border-color: #6366f1; }
-    textarea::placeholder { color: #4b5563; }
+    /* ── Input card ── */
+    .input-card {
+      background: #fff;
+      border: 1.5px solid var(--lilac);
+      border-radius: 18px;
+      padding: 36px;
+      margin-bottom: 28px;
+      box-shadow: 0 2px 18px rgba(94,53,177,0.10);
+    }
+    .input-card h2 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      color: var(--plum-light);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    textarea {
+      width: 100%;
+      background: var(--near-white);
+      border: 1.5px solid var(--lilac);
+      border-radius: 12px;
+      color: var(--plum);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      padding: 16px;
+      resize: vertical;
+      min-height: 140px;
+      line-height: 1.6;
+      transition: border-color 0.2s;
+    }
+    textarea:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(94,53,177,0.20); }
+    textarea::placeholder { color: var(--lilac); }
+
     .btn-row { display: flex; gap: 10px; margin-top: 14px; }
-    .btn-primary { flex: 1; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-mic { width: 54px; height: 54px; border-radius: 10px; border: 1px solid #2a2f3e; background: #0f1117; color: #e8eaf0; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
-    .btn-mic.recording { background: #2d1515; border-color: #ef4444; animation: pulse 1s infinite; }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .btn-primary {
+      flex: 1;
+      background: var(--brand-gradient);
+      background-size: 300% 300%;
+      animation: gradientShift 7s ease infinite;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 17px 26px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 19px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 18px rgba(58,32,112,0.40);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(58,32,112,0.50); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
-    /* Chat interface */
-    .chat-card { background: #1a1f2e; border: 1px solid #2a2f3e; border-radius: 16px; padding: 28px; margin-bottom: 24px; display: none; }
+    /* ── Mic button ── */
+    .btn-mic {
+      width: 62px; height: 62px;
+      border-radius: 14px;
+      border: 1.5px solid var(--lilac);
+      background: var(--near-white);
+      color: var(--purple);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-mic:hover { border-color: var(--purple); background: var(--lavender); transform: translateY(-1px) scale(1.05); box-shadow: 0 4px 14px rgba(123,82,200,0.25); }
+    .btn-mic.recording { background: var(--red-light); border-color: var(--red); animation: pulse 1s infinite, ringPulse 1.4s infinite; }
+    .btn-mic.recording svg { color: var(--red); }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+    @keyframes ringPulse { 0% { box-shadow: 0 0 0 0 rgba(192,57,43,0.35); } 70% { box-shadow: 0 0 0 14px rgba(192,57,43,0); } 100% { box-shadow: 0 0 0 0 rgba(192,57,43,0); } }
+    .mic-icon { width: 22px; height: 22px; }
+    .mic-stop { width: 18px; height: 18px; background: var(--red); border-radius: 3px; display: none; }
+    .btn-mic.recording .mic-icon { display: none; }
+    .btn-mic.recording .mic-stop { display: block; }
+    .listening-hint { font-size: 13px; color: var(--red); font-weight: 600; margin-top: 6px; display: none; align-items: center; gap: 6px; }
+    .listening-hint.visible { display: flex; }
+    .listening-hint .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: pulse 1s infinite; }
+
+    .voice-toggle-btn {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 1.5px solid var(--lilac);
+      background: var(--near-white);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .voice-toggle-btn:hover { border-color: var(--purple); background: var(--lavender); transform: translateY(-1px) scale(1.08); }
+
+    /* ── Chat ── */
+    .chat-card {
+      background: #fff;
+      border: 1.5px solid var(--lilac);
+      border-radius: 18px;
+      padding: 36px;
+      margin-bottom: 28px;
+      display: none;
+      box-shadow: 0 2px 18px rgba(94,53,177,0.10);
+    }
     .chat-card.visible { display: block; }
     .chat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
     .chat-header .section-label { margin-bottom: 0; }
     .profile-progress { display: flex; gap: 6px; }
-    .profile-dot { width: 8px; height: 8px; border-radius: 50%; background: #2a2f3e; transition: background 0.3s; }
-    .profile-dot.filled { background: #34d399; }
-    .chat-messages { min-height: 200px; max-height: 400px; overflow-y: auto; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px; }
-    .msg { padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.6; max-width: 85%; }
-    .msg.agent { background: #0f1117; border: 1px solid #2a2f3e; align-self: flex-start; }
-    .msg.agent .hindi { font-size: 15px; color: #e8eaf0; margin-bottom: 4px; }
-    .msg.agent .english { font-size: 12px; color: #6b7280; }
-    .msg.user { background: #1e2a4a; align-self: flex-end; color: #e8eaf0; }
-    .msg.system-msg { background: #1e3a2f; border: 1px solid #34d399; align-self: center; color: #34d399; font-size: 12px; max-width: 100%; text-align: center; }
+    .profile-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--lavender); transition: background 0.3s; }
+    .profile-dot.filled { background: #5E35B1; box-shadow: 0 0 6px rgba(94,53,177,0.55); }
+    .chat-messages { min-height: 200px; max-height: 480px; overflow-y: auto; margin-bottom: 16px; display: flex; flex-direction: column; gap: 14px; padding-right: 4px; }
+    .msg-row { display: flex; align-items: flex-end; gap: 10px; max-width: 100%; animation: fadeInUp 0.35s ease both; }
+    .msg-row.user { flex-direction: row-reverse; }
+    .msg-row.system-row { justify-content: center; }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .avatar.agent { background: linear-gradient(135deg, #7B52C8, #3A2070); color: #fff; box-shadow: 0 3px 10px rgba(58,32,112,0.35); }
+    .avatar.user { background: linear-gradient(135deg, #D8C8FF, #BBA5F0); color: var(--plum); border: 1px solid var(--lilac); }
+    .msg { padding: 14px 18px; border-radius: 16px; font-family: 'DM Sans', sans-serif; font-size: 17px; line-height: 1.6; max-width: 78%; }
+    .msg.agent { background: var(--near-white); border: 1px solid var(--lilac); border-bottom-left-radius: 4px; }
+    .msg.user { background: linear-gradient(135deg, #D8C8FF, #BBA5F0); border: 1px solid var(--lilac); color: var(--plum); border-bottom-right-radius: 4px; }
+    .msg.system-msg { background: rgba(169,139,227,0.08); border: 1px solid var(--lilac); color: var(--purple); font-size: 15px; max-width: 100%; text-align: center; border-radius: 20px; }
     .chat-input-row { display: flex; gap: 10px; }
-    .chat-input { flex: 1; background: #0f1117; border: 1px solid #2a2f3e; border-radius: 10px; color: #e8eaf0; font-size: 14px; padding: 12px; font-family: inherit; transition: border-color 0.2s; }
-    .chat-input:focus { outline: none; border-color: #6366f1; }
-    .btn-send { background: #6366f1; color: #fff; border: none; border-radius: 10px; padding: 12px 20px; cursor: pointer; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+    .chat-input {
+      flex: 1;
+      background: var(--near-white);
+      border: 1.5px solid var(--lilac);
+      border-radius: 12px;
+      color: var(--plum);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      padding: 14px;
+      transition: border-color 0.2s;
+    }
+    .chat-input:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(94,53,177,0.20); }
+    .btn-send {
+      background: var(--brand-gradient);
+      background-size: 300% 300%;
+      animation: gradientShift 7s ease infinite;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 22px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px rgba(58,32,112,0.35);
+      letter-spacing: 0.02em;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+    .btn-send:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(58,32,112,0.45); }
 
-    /* Intelligent spinner */
-    .spinner { display: none; background: #1a1f2e; border: 1px solid #2a2f3e; border-radius: 12px; padding: 24px 28px; margin-bottom: 24px; }
+    /* ── Spinner ── */
+    .spinner {
+      display: none;
+      background: #fff;
+      border: 1.5px solid var(--lilac);
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 14px rgba(94,53,177,0.09);
+    }
     .spinner.active { display: block; }
     .spinner-steps { display: flex; flex-direction: column; gap: 10px; }
-    .spinner-step { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #6b7280; }
-    .spinner-step.active { color: #e8eaf0; }
-    .spinner-step.done { color: #34d399; }
-    .step-icon { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #2a2f3e; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
-    .spinner-step.active .step-icon { border-color: #6366f1; animation: spin 1s linear infinite; }
-    .spinner-step.done .step-icon { border-color: #34d399; background: #1e3a2f; }
+    .spinner-step { display: flex; align-items: center; gap: 12px; font-family: 'DM Sans', sans-serif; font-size: 17px; color: var(--lilac); }
+    .spinner-step.active { color: var(--plum); }
+    .spinner-step.done { color: var(--green); }
+    .step-icon { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--lilac); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+    .spinner-step.active .step-icon { border-color: #5E35B1; animation: spin 1s linear infinite; }
+    .spinner-step.done .step-icon { border-color: var(--green); background: rgba(26,122,74,0.08); }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Error */
-    .error-box { background: #2d1515; border: 1px solid #ef4444; border-radius: 12px; padding: 18px; color: #fca5a5; font-size: 13px; display: none; margin-bottom: 20px; }
+    /* ── Error ── */
+    .error-box { background: var(--red-light); border: 1.5px solid rgba(192,57,43,0.3); border-radius: 12px; padding: 18px; color: var(--red); font-family: 'DM Sans', sans-serif; font-size: 17px; display: none; margin-bottom: 20px; }
     .error-box.visible { display: block; }
 
-    /* Reasoning trace */
-    .reasoning-trace { background: #0f1117; border: 1px solid #2a2f3e; border-radius: 12px; padding: 16px; margin-bottom: 24px; font-size: 12px; color: #6b7280; font-family: monospace; display: none; }
+    /* ── Reasoning trace ── */
+    .reasoning-trace { background: var(--near-white); border: 1.5px solid var(--lilac); border-radius: 12px; padding: 16px; margin-bottom: 24px; font-size: 14px; color: var(--lilac); font-family: monospace; display: none; }
     .reasoning-trace.visible { display: block; }
-    .trace-header { color: #4b5563; margin-bottom: 8px; font-size: 11px; }
+    .trace-header { color: var(--plum-light); margin-bottom: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; letter-spacing: 0.06em; text-transform: uppercase; }
     .trace-line { padding: 3px 0; }
-    .trace-line.checking { color: #6b7280; }
-    .trace-line.eligible { color: #34d399; }
-    .trace-line.ineligible { color: #ef4444; }
-    .trace-line.warning { color: #fbbf24; }
+    .trace-line.checking { color: var(--plum-light); }
+    .trace-line.eligible { color: var(--green); }
+    .trace-line.ineligible { color: var(--red); }
+    .trace-line.warning { color: #b07d10; }
 
-    /* Rupee counter */
-    .rupee-counter { background: linear-gradient(135deg, #1e3a2f, #1a1f2e); border: 1px solid #34d399; border-radius: 16px; padding: 28px; margin-bottom: 24px; text-align: center; display: none; }
+    /* ── Rupee counter ── */
+    .rupee-counter {
+      background: linear-gradient(135deg, #D8C8FF, #BBA5F0);
+      border: 1.5px solid var(--lilac);
+      border-radius: 18px;
+      padding: 42px;
+      margin-bottom: 28px;
+      text-align: center;
+      display: none;
+      box-shadow: 0 4px 22px rgba(94,53,177,0.18);
+      position: relative;
+      overflow: hidden;
+    }
     .rupee-counter.visible { display: block; }
-    .rupee-amount { font-size: 48px; font-weight: 800; color: #34d399; font-variant-numeric: tabular-nums; }
-    .rupee-label { font-size: 13px; color: #9ca3af; margin-top: 4px; }
-    .priority-box { margin-top: 16px; background: #0f1117; border-radius: 10px; padding: 12px 20px; font-size: 13px; color: #fbbf24; text-align: left; }
-    .hindi-summary { margin-top: 12px; background: #0f1117; border-radius: 10px; padding: 14px 20px; font-size: 15px; color: #a78bfa; line-height: 1.7; text-align: left; }
+    .rupee-counter::before {
+      content: '';
+      position: absolute; inset: -40% -10% auto -10%; height: 160%;
+      background: radial-gradient(circle, rgba(255,255,255,0.35), transparent 60%);
+      pointer-events: none;
+    }
+    .rupee-amount {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 64px;
+      font-weight: 700;
+      color: var(--plum);
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 2px 12px rgba(75,59,97,0.12);
+    }
+    .rupee-label { font-family: 'DM Sans', sans-serif; font-size: 18px; color: var(--plum-light); margin-top: 4px; }
+    .priority-box { margin-top: 16px; background: rgba(255,255,255,0.75); border-radius: 10px; padding: 14px 22px; font-family: 'DM Sans', sans-serif; font-size: 17px; color: #8a6200; text-align: left; border: 1px solid rgba(205,183,246,0.5); border-left: 4px solid var(--gold); }
+    .hindi-summary { margin-top: 12px; background: rgba(255,255,255,0.75); border-radius: 10px; padding: 16px 22px; font-family: 'DM Sans', sans-serif; font-size: 18px; color: var(--plum-mid); line-height: 1.7; text-align: left; }
 
-    /* Profile card */
-    .profile-card { background: #1a1f2e; border: 1px solid #2a2f3e; border-radius: 16px; padding: 24px; margin-bottom: 20px; display: none; }
+    /* ── Profile card ── */
+    .profile-card {
+      background: #fff;
+      border: 1.5px solid var(--lilac);
+      border-radius: 18px;
+      padding: 32px;
+      margin-bottom: 24px;
+      display: none;
+      box-shadow: 0 2px 14px rgba(94,53,177,0.09);
+    }
     .profile-card.visible { display: block; }
-    .section-label { font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
-    .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    .profile-item label { font-size: 11px; color: #6b7280; text-transform: uppercase; display: block; }
-    .profile-item p { font-size: 14px; color: #e8eaf0; margin-top: 3px; font-weight: 500; }
+    .section-label {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--plum-light);
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+    .profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .profile-item label { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--lilac); text-transform: uppercase; letter-spacing: 0.06em; display: block; font-weight: 600; }
+    .profile-item p { font-family: 'DM Sans', sans-serif; font-size: 18px; color: var(--plum); margin-top: 3px; font-weight: 600; }
 
-    /* Contractor alert */
-    .contractor-alert { background: #2d1515; border: 2px solid #ef4444; border-radius: 12px; padding: 20px; margin-bottom: 20px; display: none; }
+    /* ── Contractor alert ── */
+    .contractor-alert {
+      background: var(--red-light);
+      border: 2px solid rgba(192,57,43,0.35);
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 24px;
+      display: none;
+    }
     .contractor-alert.visible { display: block; }
-    .contractor-alert-title { font-size: 15px; font-weight: 700; color: #ef4444; margin-bottom: 8px; }
-    .contractor-alert-body { font-size: 13px; color: #fca5a5; line-height: 1.6; }
-    .btn-complaint { margin-top: 14px; background: #ef4444; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-size: 13px; cursor: pointer; font-weight: 600; display: inline-block; }
-    .btn-complaint:hover { background: #dc2626; }
+    .contractor-alert-title { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; color: var(--red); margin-bottom: 8px; }
+    .contractor-alert-body { font-family: 'DM Sans', sans-serif; font-size: 17px; color: #8b2020; line-height: 1.6; }
+    .btn-complaint { margin-top: 14px; background: linear-gradient(135deg, #d64535, var(--red)); color: #fff; border: none; border-radius: 10px; padding: 13px 26px; font-family: 'DM Sans', sans-serif; font-size: 17px; cursor: pointer; font-weight: 600; display: inline-block; transition: transform 0.15s, box-shadow 0.2s; letter-spacing: 0.02em; box-shadow: 0 3px 12px rgba(192,57,43,0.30); }
+    .btn-complaint:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(192,57,43,0.42); }
 
-    /* Scheme cards */
+    /* ── Scheme cards ── */
     .schemes-section { display: none; }
     .schemes-section.visible { display: block; }
-    .schemes-section-label { font-size: 12px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
-    .scheme-card { background: #1a1f2e; border: 1px solid #2a2f3e; border-radius: 14px; padding: 22px; margin-bottom: 14px; }
-    .scheme-card.high { border-left: 4px solid #ef4444; }
-    .scheme-card.medium { border-left: 4px solid #fbbf24; }
-    .scheme-card.low { border-left: 4px solid #6366f1; }
+    .schemes-section-label { font-family: 'DM Sans', sans-serif; font-size: 15px; color: var(--plum-light); text-transform: uppercase; letter-spacing: 0.09em; font-weight: 600; margin-bottom: 14px; }
+    .scheme-card {
+      background: #fff;
+      border: 1.5px solid var(--lilac);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 10px rgba(94,53,177,0.08);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .scheme-card:hover { border-color: #5E35B1; box-shadow: 0 6px 24px rgba(58,32,112,0.20); transform: translateY(-2px); }
+    .scheme-card.high  { border-left: 4px solid var(--red); }
+    .scheme-card.medium { border-left: 4px solid var(--purple); }
+    .scheme-card.low   { border-left: 4px solid var(--lilac); }
     .scheme-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 12px; }
-    .scheme-name { font-size: 16px; font-weight: 700; color: #fff; }
+    .scheme-name { font-family: 'DM Sans', sans-serif; font-size: 20px; font-weight: 700; color: var(--plum); }
     .badge-row { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
-    .urgency-badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
-    .urgency-badge.high { background: #2d1515; color: #ef4444; border: 1px solid #ef4444; }
-    .urgency-badge.medium { background: #2d2010; color: #fbbf24; border: 1px solid #fbbf24; }
-    .urgency-badge.low { background: #1e1e3a; color: #6366f1; border: 1px solid #6366f1; }
-    .confidence-badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
-    .confidence-badge.HIGH { background: #1e3a2f; color: #34d399; border: 1px solid #34d399; }
-    .confidence-badge.MEDIUM { background: #2d2010; color: #fbbf24; border: 1px solid #fbbf24; }
-    .confidence-badge.LOW { background: #2d1515; color: #ef4444; border: 1px solid #ef4444; }
-    .scheme-reason { font-size: 13px; color: #9ca3af; margin-bottom: 14px; line-height: 1.5; }
-    .scheme-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .detail-box { background: #0f1117; border-radius: 8px; padding: 10px 14px; }
-    .detail-box label { font-size: 10px; color: #6b7280; text-transform: uppercase; display: block; }
-    .detail-box p { font-size: 12px; color: #e8eaf0; margin-top: 3px; line-height: 1.4; }
-    .source-line { font-size: 11px; color: #4b5563; margin-top: 10px; }
-    .source-line a { color: #6366f1; text-decoration: none; }
+    .urgency-badge { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .urgency-badge.high   { background: rgba(192,57,43,0.08); color: var(--red); border: 1px solid rgba(192,57,43,0.28); }
+    .urgency-badge.medium { background: rgba(169,139,227,0.10); color: var(--plum-mid); border: 1px solid var(--lilac); }
+    .urgency-badge.low    { background: var(--lavender); color: var(--plum-light); border: 1px solid var(--lilac); }
+    .confidence-badge { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 3px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .confidence-badge.HIGH   { background: rgba(26,122,74,0.08); color: var(--green); border: 1px solid rgba(26,122,74,0.28); }
+    .confidence-badge.MEDIUM { background: rgba(169,139,227,0.10); color: var(--plum-mid); border: 1px solid var(--lilac); }
+    .confidence-badge.LOW    { background: rgba(192,57,43,0.08); color: var(--red); border: 1px solid rgba(192,57,43,0.28); }
+    .scheme-reason { font-family: 'DM Sans', sans-serif; font-size: 17px; color: var(--plum-light); margin-bottom: 14px; line-height: 1.55; }
+    .scheme-details { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .detail-box { background: var(--near-white); border-radius: 10px; padding: 14px 18px; border: 1px solid var(--lavender); }
+    .detail-box label { font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--plum-light); text-transform: uppercase; letter-spacing: 0.06em; display: block; font-weight: 600; }
+    .detail-box p { font-family: 'DM Sans', sans-serif; font-size: 16px; color: var(--plum); margin-top: 3px; line-height: 1.4; }
+    .source-line { font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--plum-light); margin-top: 10px; }
+    .source-line a { color: var(--purple); text-decoration: none; }
     .source-line a:hover { text-decoration: underline; }
-    .deadline-line { font-size: 12px; color: #fbbf24; margin-top: 8px; background: #2d2010; padding: 6px 10px; border-radius: 6px; display: inline-block; }
+    .deadline-line { font-family: 'DM Sans', sans-serif; font-size: 16px; color: #8a6200; margin-top: 8px; background: rgba(205,183,246,0.15); border: 1px solid var(--lilac); padding: 6px 11px; border-radius: 6px; display: inline-block; }
 
-    /* Ineligible section */
-    .ineligible-section { background: #1a1f2e; border: 1px solid #2a2f3e; border-radius: 14px; padding: 20px; margin-bottom: 20px; display: none; }
+    /* ── Ineligible ── */
+    .ineligible-section {
+      background: #fff;
+      border: 1.5px solid var(--lilac);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 24px;
+      display: none;
+      box-shadow: 0 2px 10px rgba(94,53,177,0.07);
+    }
     .ineligible-section.visible { display: block; }
-    .ineligible-item { font-size: 13px; color: #6b7280; padding: 8px 0; border-bottom: 1px solid #2a2f3e; display: flex; gap: 8px; }
+    .ineligible-item { font-family: 'DM Sans', sans-serif; font-size: 17px; color: var(--plum-light); padding: 8px 0; border-bottom: 1px solid var(--lavender); display: flex; gap: 8px; }
     .ineligible-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .ineligible-item .x { color: #ef4444; flex-shrink: 0; }
+    .ineligible-item .x { color: var(--red); flex-shrink: 0; }
 
-    /* Mobile */
+    /* ── Mobile ── */
     @media (max-width: 600px) {
-      header { padding: 14px 16px; }
-      .header-text h1 { font-size: 16px; }
+      header { padding: 12px 16px; }
+      .logo { width: 58px; height: 58px; border-radius: 15px; }
+      .logo svg { width: 36px; height: 36px; }
+      .header-text h1 { font-size: 22px; }
+      .header-right { gap: 6px; }
+      .lang-btn { padding: 4px 10px; font-size: 12px; }
       .profile-grid { grid-template-columns: repeat(2, 1fr); }
       .scheme-details { grid-template-columns: 1fr; }
-      .rupee-amount { font-size: 36px; }
+      .rupee-amount { font-size: 38px; }
       .sovereignty-grid { grid-template-columns: 1fr; }
       .scheme-header { flex-direction: column; gap: 8px; }
     }
@@ -167,176 +585,225 @@
 <body>
 
 <header>
-  <div class="logo">🤝</div>
+  <div class="logo">
+    <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M11 25.5 C9.2 23.7 8.5 21 8.5 18.5 L8.5 12.5 C8.5 11.4 9.4 10.5 10.5 10.5 C11.6 10.5 12.5 11.4 12.5 12.5 L12.5 17.5
+               L13.5 17.5 L13.5 9.5 C13.5 8.4 14.4 7.5 15.5 7.5 C16.6 7.5 17.5 8.4 17.5 9.5 L17.5 17.5
+               L18.5 17.5 L18.5 10.5 C18.5 9.4 19.4 8.5 20.5 8.5 C21.6 8.5 22.5 9.4 22.5 10.5 L22.5 17.5
+               L23.5 17.5 L23.5 12.5 C23.5 11.4 24.4 10.5 25.5 10.5 C26.6 10.5 27.5 11.4 27.5 12.5 L27.5 20.5
+               C27.5 24.2 24.8 28 21 28.5 L17 28.5 C14.2 28.5 12 27.3 11 25.5 Z"
+            fill="white" opacity="0.95"/>
+      <path d="M18 14 C18 14 16.2 11.8 14.8 13 C13.4 14.2 13.9 16.2 15.3 17.2 L18 19.5 L20.7 17.2 C22.1 16.2 22.6 14.2 21.2 13 C19.8 11.8 18 14 18 14 Z"
+            fill="#E9D9FF"/>
+    </svg>
+  </div>
+
   <div class="header-text">
     <h1>SahayakAI</h1>
-    <p>Migrant Worker Welfare Agent — Bengaluru</p>
+    <p class="translatable" data-en="Migrant Worker Welfare Agent — Bengaluru" data-hi="प्रवासी श्रमिक कल्याण एजेंट — बेंगलुरु">Migrant Worker Welfare Agent — Bengaluru</p>
   </div>
-  <div class="sovereign-badge" onclick="toggleSovereignty()">🔒 Sovereign AI</div>
+
+  <div class="header-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="lang-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="lang-hi" onclick="setLang('hi')">हि</button>
+    </div>
+    <div class="sovereign-badge" onclick="toggleSovereignty()">
+      <span class="translatable" data-en="🔒 Sovereign AI" data-hi="🔒 संप्रभु AI">🔒 Sovereign AI</span>
+    </div>
+  </div>
 </header>
 
 <main>
 
-  <!-- Sovereignty panel — shown when badge is clicked -->
   <div class="sovereignty-panel" id="sovereigntyPanel">
-    <h3>🔒 How Your Data Is Protected</h3>
+    <h3 class="translatable" data-en="🔒 How Your Data Is Protected" data-hi="🔒 आपका डेटा कैसे सुरक्षित है">🔒 How Your Data Is Protected</h3>
     <div class="sovereignty-grid">
       <div class="sovereignty-item">
-        <div class="label">Your personal profile</div>
-        <div class="value safe">✓ Stays in your browser only</div>
+        <div class="label translatable" data-en="Your personal profile" data-hi="आपकी व्यक्तिगत प्रोफ़ाइल">Your personal profile</div>
+        <div class="value safe translatable" data-en="✓ Stays in your browser only" data-hi="✓ केवल आपके ब्राउज़र में">✓ Stays in your browser only</div>
       </div>
       <div class="sovereignty-item">
-        <div class="label">Your income &amp; family details</div>
-        <div class="value safe">✓ Never transmitted anywhere</div>
+        <div class="label translatable" data-en="Your income &amp; family details" data-hi="आपकी आय और परिवार की जानकारी">Your income &amp; family details</div>
+        <div class="value safe translatable" data-en="✓ Never transmitted anywhere" data-hi="✓ कहीं भी नहीं भेजी जाती">✓ Never transmitted anywhere</div>
       </div>
       <div class="sovereignty-item">
-        <div class="label">What the AI receives</div>
-        <div class="value sent">Only your situation description</div>
+        <div class="label translatable" data-en="What the AI receives" data-hi="AI को क्या मिलता है">What the AI receives</div>
+        <div class="value sent translatable" data-en="Only your situation description" data-hi="केवल आपकी स्थिति का विवरण">Only your situation description</div>
       </div>
       <div class="sovereignty-item">
-        <div class="label">Scheme rules knowledge base</div>
-        <div class="value safe">✓ Verified government sources</div>
+        <div class="label translatable" data-en="Scheme rules knowledge base" data-hi="योजना नियम ज्ञानकोश">Scheme rules knowledge base</div>
+        <div class="value safe translatable" data-en="✓ Verified government sources" data-hi="✓ सत्यापित सरकारी स्रोत">✓ Verified government sources</div>
       </div>
       <div class="sovereignty-item">
-        <div class="label">Complaint letters</div>
-        <div class="value safe">✓ You review before filing</div>
+        <div class="label translatable" data-en="Complaint letters" data-hi="शिकायत पत्र">Complaint letters</div>
+        <div class="value safe translatable" data-en="✓ You review before filing" data-hi="✓ दाखिल करने से पहले आप देखें">✓ You review before filing</div>
       </div>
       <div class="sovereignty-item">
-        <div class="label">Data sold to third parties</div>
-        <div class="value safe">✓ Never</div>
+        <div class="label translatable" data-en="Data sold to third parties" data-hi="तृतीय पक्षों को डेटा बेचना">Data sold to third parties</div>
+        <div class="value safe translatable" data-en="✓ Never" data-hi="✓ कभी नहीं">✓ Never</div>
       </div>
     </div>
   </div>
 
-  <!-- Mode toggle -->
   <div class="mode-toggle">
-    <button class="mode-btn active" onclick="setMode('quick')" id="btn-quick">⚡ Quick Analysis</button>
-    <button class="mode-btn" onclick="setMode('chat')" id="btn-chat">💬 Interview Mode</button>
+    <button class="mode-btn active" onclick="setMode('quick')" id="btn-quick">
+      <span class="translatable" data-en="Quick Analysis" data-hi="त्वरित विश्लेषण">Quick Analysis</span>
+    </button>
+    <button class="mode-btn" onclick="setMode('chat')" id="btn-chat">
+      <span class="translatable" data-en="Interview Mode" data-hi="साक्षात्कार मोड">Interview Mode</span>
+    </button>
   </div>
 
-  <!-- Quick mode -->
   <div id="quick-mode">
     <div class="input-card">
-      <h2>Worker Situation</h2>
-      <textarea id="workerInput" placeholder="Describe the worker's situation in plain language. Example: I came from Bihar to Bengaluru 11 months ago for construction work. I earn 13500 rupees a month. I have my wife and one child with me. I have an e-Shram card but my contractor has not registered me under BOCW."></textarea>
+      <h2 class="translatable" data-en="Worker Situation" data-hi="श्रमिक की स्थिति">Worker Situation</h2>
+      <textarea id="workerInput" class="translatable-placeholder"
+        data-en-placeholder="Describe the worker's situation in plain language. Example: I came from Bihar to Bengaluru 11 months ago for construction work. I earn 13500 rupees a month. I have my wife and one child with me. I have an e-Shram card but my contractor has not registered me under BOCW."
+        data-hi-placeholder="श्रमिक की स्थिति सरल भाषा में बताएं। उदाहरण: मैं 11 महीने पहले बिहार से बेंगलुरु निर्माण कार्य के लिए आया। मेरी मासिक आय 13500 रुपये है। मेरी पत्नी और एक बच्चा मेरे साथ हैं। मेरे पास ई-श्रम कार्ड है लेकिन ठेकेदार ने BOCW के तहत पंजीकृत नहीं किया।"
+        placeholder="Describe the worker's situation in plain language. Example: I came from Bihar to Bengaluru 11 months ago for construction work. I earn 13500 rupees a month. I have my wife and one child with me. I have an e-Shram card but my contractor has not registered me under BOCW."></textarea>
       <div class="btn-row">
-        <button class="btn-mic" id="micBtn" onclick="toggleRecording()" title="Record in Hindi">🎤</button>
-        <button class="btn-primary" id="analyzeBtn" onclick="analyze()">🔍 Analyze Entitlements</button>
+        <button class="btn-mic" id="micBtn" onclick="toggleRecording()" title="Record in Hindi">
+          <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="2" width="6" height="12" rx="3"/>
+            <path d="M5 10a7 7 0 0 0 14 0"/>
+            <line x1="12" y1="19" x2="12" y2="22"/>
+            <line x1="8" y1="22" x2="16" y2="22"/>
+          </svg>
+          <div class="mic-stop"></div>
+        </button>
+        <button class="btn-primary" id="analyzeBtn" onclick="analyze()">
+          <span class="translatable" data-en="Analyze Entitlements" data-hi="पात्रता जाँचें">Analyze Entitlements</span>
+        </button>
+      </div>
+      <div class="listening-hint" id="listeningHint">
+        <span class="dot"></span>
+        <span class="translatable" data-en="Listening... tap the mic again to stop" data-hi="सुन रहे हैं... रोकने के लिए माइक फिर दबाएं">Listening... tap the mic again to stop</span>
       </div>
     </div>
   </div>
 
-  <!-- Chat mode -->
   <div id="chat-mode" style="display:none;">
     <div class="chat-card visible">
       <div class="chat-header">
-        <div class="section-label">Conversational Interview</div>
-        <div class="profile-progress" id="profileProgress">
-          <div class="profile-dot" id="dot-occupation" title="Occupation"></div>
-          <div class="profile-dot" id="dot-state" title="Current State"></div>
-          <div class="profile-dot" id="dot-months" title="Months Here"></div>
-          <div class="profile-dot" id="dot-income" title="Income"></div>
+        <div class="section-label translatable" data-en="Conversational Interview" data-hi="संवादात्मक साक्षात्कार">Conversational Interview</div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="profile-progress" id="profileProgress">
+            <div class="profile-dot" id="dot-occupation" title="Occupation"></div>
+            <div class="profile-dot" id="dot-state" title="Current State"></div>
+            <div class="profile-dot" id="dot-months" title="Months Here"></div>
+            <div class="profile-dot" id="dot-income" title="Income"></div>
+          </div>
+          <button class="voice-toggle-btn" id="voiceToggleBtn" onclick="toggleVoiceAssistant()" title="Mute/unmute the voice assistant reading messages aloud">🔊</button>
         </div>
       </div>
       <div class="chat-messages" id="chatMessages"></div>
       <div class="chat-input-row">
-        <button class="btn-mic" id="micBtnChat" onclick="toggleRecordingChat()" title="Speak in Hindi">🎤</button>
-        <input class="chat-input" id="chatInput" placeholder="Type your answer in Hindi or English..." onkeydown="if(event.key==='Enter') sendChat()" />
-        <button class="btn-send" onclick="sendChat()">Send</button>
+        <button class="btn-mic" id="micBtnChat" onclick="toggleRecordingChat()" title="Speak in Hindi">
+          <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="2" width="6" height="12" rx="3"/>
+            <path d="M5 10a7 7 0 0 0 14 0"/>
+            <line x1="12" y1="19" x2="12" y2="22"/>
+            <line x1="8" y1="22" x2="16" y2="22"/>
+          </svg>
+          <div class="mic-stop"></div>
+        </button>
+        <input class="chat-input translatable-placeholder" id="chatInput"
+          data-en-placeholder="Type your answer in Hindi or English..."
+          data-hi-placeholder="हिंदी या अंग्रेजी में उत्तर दें..."
+          placeholder="Type your answer in Hindi or English..."
+          onkeydown="if(event.key==='Enter') sendChat()" />
+        <button class="btn-send" onclick="sendChat()">
+          <span class="translatable" data-en="Send" data-hi="भेजें">Send</span>
+        </button>
+      </div>
+      <div class="listening-hint" id="listeningHintChat">
+        <span class="dot"></span>
+        <span class="translatable" data-en="Listening... tap the mic again to send" data-hi="सुन रहे हैं... भेजने के लिए माइक फिर दबाएं">Listening... tap the mic again to send</span>
       </div>
     </div>
   </div>
 
-  <!-- Intelligent spinner -->
   <div class="spinner" id="spinner">
     <div class="spinner-steps">
-      <div class="spinner-step" id="step-1">
-        <div class="step-icon">◌</div>
-        <span>Reading worker situation...</span>
-      </div>
-      <div class="spinner-step" id="step-2">
-        <div class="step-icon">◌</div>
-        <span>Loading scheme rules from knowledge base...</span>
-      </div>
-      <div class="spinner-step" id="step-3">
-        <div class="step-icon">◌</div>
-        <span>Checking eligibility against each scheme...</span>
-      </div>
-      <div class="spinner-step" id="step-4">
-        <div class="step-icon">◌</div>
-        <span>Checking contractor compliance...</span>
-      </div>
-      <div class="spinner-step" id="step-5">
-        <div class="step-icon">◌</div>
-        <span>Building action plan...</span>
-      </div>
+      <div class="spinner-step" id="step-1"><div class="step-icon">◌</div><span class="translatable" data-en="Reading worker situation..." data-hi="श्रमिक की स्थिति पढ़ रहे हैं...">Reading worker situation...</span></div>
+      <div class="spinner-step" id="step-2"><div class="step-icon">◌</div><span class="translatable" data-en="Loading scheme rules from knowledge base..." data-hi="ज्ञानकोश से योजना नियम लोड हो रहे हैं...">Loading scheme rules from knowledge base...</span></div>
+      <div class="spinner-step" id="step-3"><div class="step-icon">◌</div><span class="translatable" data-en="Checking eligibility against each scheme..." data-hi="प्रत्येक योजना के लिए पात्रता जाँच रहे हैं...">Checking eligibility against each scheme...</span></div>
+      <div class="spinner-step" id="step-4"><div class="step-icon">◌</div><span class="translatable" data-en="Checking contractor compliance..." data-hi="ठेकेदार अनुपालन जाँच रहे हैं...">Checking contractor compliance...</span></div>
+      <div class="spinner-step" id="step-5"><div class="step-icon">◌</div><span class="translatable" data-en="Building action plan..." data-hi="कार्य योजना बना रहे हैं...">Building action plan...</span></div>
     </div>
   </div>
 
   <div class="error-box" id="errorBox"></div>
 
-  <!-- Reasoning trace -->
   <div class="reasoning-trace" id="reasoningTrace">
-    <div class="trace-header">REASONING TRACE</div>
+    <div class="trace-header translatable" data-en="REASONING TRACE" data-hi="तर्क विवरण">REASONING TRACE</div>
     <div id="traceLines"></div>
   </div>
 
-  <!-- Rupee counter -->
   <div class="rupee-counter" id="rupeeCounter">
     <div class="rupee-amount" id="rupeeAmount">₹0</div>
-    <div class="rupee-label" id="rupeeLabel">potential monthly entitlements</div>
+    <div class="rupee-label translatable" id="rupeeLabel" data-en="potential monthly entitlements" data-hi="संभावित मासिक हकदारी">potential monthly entitlements</div>
     <div class="priority-box" id="priorityBox"></div>
     <div class="hindi-summary" id="hindiSummary"></div>
   </div>
 
-  <!-- Profile card -->
   <div class="profile-card" id="profileCard">
-    <div class="section-label">Extracted Profile</div>
+    <div class="section-label translatable" data-en="Extracted Profile" data-hi="निकाली गई प्रोफ़ाइल">Extracted Profile</div>
     <div class="profile-grid" id="profileGrid"></div>
   </div>
 
-  <!-- Contractor alert -->
   <div class="contractor-alert" id="contractorAlert">
-    <div class="contractor-alert-title">⚠️ Contractor Violation Detected</div>
-    <div class="contractor-alert-body">
+    <div class="contractor-alert-title translatable" data-en="⚠️ Contractor Violation Detected" data-hi="⚠️ ठेकेदार उल्लंघन पाया गया">⚠️ Contractor Violation Detected</div>
+    <div class="contractor-alert-body translatable"
+      data-en="Your contractor is legally required to register you under BOCW Act 1996, Section 7.<br>They have <strong>not</strong> done this. You can file a formal complaint at the District Labour Office.<br>The contractor faces a fine of up to <strong>₹1,00,000</strong>."
+      data-hi="आपके ठेकेदार को BOCW अधिनियम 1996, धारा 7 के तहत आपको पंजीकृत करना कानूनी रूप से आवश्यक है।<br>उन्होंने यह <strong>नहीं</strong> किया। आप जिला श्रम कार्यालय में औपचारिक शिकायत दर्ज कर सकते हैं।<br>ठेकेदार पर <strong>₹1,00,000</strong> तक का जुर्माना हो सकता है।">
       Your contractor is legally required to register you under BOCW Act 1996, Section 7.<br>
       They have <strong>not</strong> done this. You can file a formal complaint at the District Labour Office.<br>
       The contractor faces a fine of up to <strong>₹1,00,000</strong>.
     </div>
-    <button class="btn-complaint" onclick="generateComplaint()">📄 Generate Complaint Letter</button>
+    <button class="btn-complaint" onclick="generateComplaint()">
+      <span class="translatable" data-en="📄 Generate Complaint Letter" data-hi="📄 शिकायत पत्र बनाएं">📄 Generate Complaint Letter</span>
+    </button>
   </div>
 
-  <!-- Eligible schemes -->
   <div class="schemes-section" id="schemesSection">
-    <div class="schemes-section-label">Eligible Schemes</div>
+    <div class="schemes-section-label translatable" data-en="Eligible Schemes" data-hi="पात्र योजनाएं">Eligible Schemes</div>
     <div id="schemesList"></div>
   </div>
 
-  <!-- Ineligible schemes -->
   <div class="ineligible-section" id="ineligibleSection">
-    <div class="section-label" style="margin-bottom:12px;">Schemes You Do Not Currently Qualify For</div>
+    <div class="section-label translatable" style="margin-bottom:12px;" data-en="Schemes You Do Not Currently Qualify For" data-hi="वे योजनाएं जिनके लिए आप अभी पात्र नहीं हैं">Schemes You Do Not Currently Qualify For</div>
     <div id="ineligibleList"></div>
   </div>
 
 </main>
 
 <script>
-  let currentMode = 'quick';
-  let chatHistory = [];
-  let profileSoFar = {};
-  let mediaRecorder = null;
-  let audioChunks = [];
-  let isRecording = false;
-  let currentProfile = {};
-  let spinnerInterval = null;
+  let currentMode = 'quick', currentLang = 'en', chatHistory = [], chatLog = [], profileSoFar = {},
+      recognition = null, isVoiceRecording = false, isVoiceRecordingChat = false,
+      workerStopRequested = false, chatStopRequested = false,
+      workerTranscript = '', chatTranscript = '',
+      isSending = false, voiceAssistantEnabled = true, spokenCount = 0,
+      currentProfile = {}, spinnerInterval = null;
 
-  // ── Sovereignty panel ────────────────────────────────────────────────────
-  function toggleSovereignty() {
-    const panel = document.getElementById('sovereigntyPanel');
-    panel.classList.toggle('visible');
+  function setLang(lang) {
+    currentLang = lang;
+    document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+    document.getElementById('lang-hi').classList.toggle('active', lang === 'hi');
+    document.querySelectorAll('.translatable').forEach(el => {
+      const v = lang === 'hi' ? el.dataset.hi : el.dataset.en;
+      if (v !== undefined) el.innerHTML = v;
+    });
+    document.querySelectorAll('.translatable-placeholder').forEach(el => {
+      const ph = lang === 'hi' ? el.dataset.hiPlaceholder : el.dataset.enPlaceholder;
+      if (ph) el.placeholder = ph;
+    });
+    renderChatLog();
   }
 
-  // ── Mode switching ───────────────────────────────────────────────────────
+  function toggleSovereignty() { document.getElementById('sovereigntyPanel').classList.toggle('visible'); }
+
   function setMode(mode) {
     currentMode = mode;
     document.getElementById('btn-quick').classList.toggle('active', mode === 'quick');
@@ -349,393 +816,359 @@
   function show(id) { const el = document.getElementById(id); if (el) el.classList.add('visible'); }
   function hide(id) { const el = document.getElementById(id); if (el) el.classList.remove('visible'); }
 
-  // ── Intelligent spinner ──────────────────────────────────────────────────
   function startSpinner() {
     document.getElementById('spinner').classList.add('active');
     const steps = ['step-1','step-2','step-3','step-4','step-5'];
-    let current = 0;
-
-    // Mark first step active
+    let cur = 0;
     document.getElementById(steps[0]).classList.add('active');
-
     spinnerInterval = setInterval(() => {
-      if (current < steps.length - 1) {
-        document.getElementById(steps[current]).classList.remove('active');
-        document.getElementById(steps[current]).classList.add('done');
-        document.getElementById(steps[current]).querySelector('.step-icon').textContent = '✓';
-        current++;
-        document.getElementById(steps[current]).classList.add('active');
+      if (cur < steps.length - 1) {
+        document.getElementById(steps[cur]).classList.remove('active');
+        document.getElementById(steps[cur]).classList.add('done');
+        document.getElementById(steps[cur]).querySelector('.step-icon').textContent = '✓';
+        cur++;
+        document.getElementById(steps[cur]).classList.add('active');
       }
     }, 800);
   }
 
   function stopSpinner() {
     clearInterval(spinnerInterval);
-    // Mark all steps done
     for (let i = 1; i <= 5; i++) {
-      const step = document.getElementById(`step-${i}`);
-      step.classList.remove('active');
-      step.classList.add('done');
-      step.querySelector('.step-icon').textContent = '✓';
+      const s = document.getElementById(`step-${i}`);
+      s.classList.remove('active'); s.classList.add('done');
+      s.querySelector('.step-icon').textContent = '✓';
     }
     setTimeout(() => {
       document.getElementById('spinner').classList.remove('active');
-      // Reset for next time
       for (let i = 1; i <= 5; i++) {
-        const step = document.getElementById(`step-${i}`);
-        step.classList.remove('active','done');
-        step.querySelector('.step-icon').textContent = '◌';
+        const s = document.getElementById(`step-${i}`);
+        s.classList.remove('active','done');
+        s.querySelector('.step-icon').textContent = '◌';
       }
     }, 400);
   }
 
-  // ── Reasoning trace ──────────────────────────────────────────────────────
   function showTrace(lines) {
     const el = document.getElementById('traceLines');
     el.innerHTML = '';
-    lines.forEach(line => {
-      const div = document.createElement('div');
-      div.className = `trace-line ${line.type}`;
-      div.textContent = line.text;
-      el.appendChild(div);
-    });
+    lines.forEach(l => { const d = document.createElement('div'); d.className = `trace-line ${l.type}`; d.textContent = l.text; el.appendChild(d); });
     show('reasoningTrace');
   }
 
   function buildTrace(schemes, ineligible) {
-    const lines = [];
-    lines.push({ type: 'checking', text: '> Reading worker profile from conversation...' });
-    lines.push({ type: 'checking', text: '> Loading scheme rules from knowledge base (JSON files)...' });
-    lines.push({ type: 'checking', text: '> Running eligibility reasoning...' });
-    (schemes || []).forEach(s => {
-      lines.push({ type: 'eligible', text: `✓ ${s.scheme_name} — ELIGIBLE (${s.confidence} confidence)` });
-    });
-    (ineligible || []).forEach(s => {
-      lines.push({ type: 'ineligible', text: `✗ ${s.scheme_name} — ${s.reason}` });
-    });
-    lines.push({ type: 'checking', text: '> Checking contractor registration compliance...' });
+    const lines = [
+      { type:'checking', text:'> Reading worker profile from conversation...' },
+      { type:'checking', text:'> Loading scheme rules from knowledge base (JSON files)...' },
+      { type:'checking', text:'> Running eligibility reasoning...' }
+    ];
+    (schemes||[]).forEach(s => lines.push({ type:'eligible', text:`✓ ${s.scheme_name} — ELIGIBLE (${s.confidence} confidence)` }));
+    (ineligible||[]).forEach(s => lines.push({ type:'ineligible', text:`✗ ${s.scheme_name} — ${s.reason}` }));
+    lines.push({ type:'checking', text:'> Checking contractor registration compliance...' });
     return lines;
   }
 
-  // ── Quick analysis ───────────────────────────────────────────────────────
   async function analyze() {
     const text = document.getElementById('workerInput').value.trim();
     if (!text) { alert('Please describe the worker situation first.'); return; }
-
     document.getElementById('analyzeBtn').disabled = true;
     ['profileCard','rupeeCounter','contractorAlert','ineligibleSection','errorBox','reasoningTrace'].forEach(hide);
     document.getElementById('schemesSection').classList.remove('visible');
     document.getElementById('schemesList').innerHTML = '';
     document.getElementById('ineligibleList').innerHTML = '';
-
     startSpinner();
-
     try {
-      const res = await fetch('/analyze', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
+      const res = await fetch('/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({text}) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Server error');
-      stopSpinner();
-      renderResults(data);
-    } catch (err) {
+      stopSpinner(); renderResults(data);
+    } catch(err) {
       stopSpinner();
       const box = document.getElementById('errorBox');
-      box.textContent = '❌ Error: ' + err.message;
-      show('errorBox');
-    } finally {
-      document.getElementById('analyzeBtn').disabled = false;
-    }
+      box.textContent = '❌ Error: ' + err.message; show('errorBox');
+    } finally { document.getElementById('analyzeBtn').disabled = false; }
   }
 
-  // ── Render results ───────────────────────────────────────────────────────
   function renderResults(data) {
-    const profile = data.profile || {};
-    const eligibility = data.eligibility || {};
+    const profile = data.profile || {}, eligibility = data.eligibility || {};
     currentProfile = profile;
-
-    // Reasoning trace
     showTrace(buildTrace(eligibility.eligible_schemes, eligibility.ineligible_schemes));
-
-    // Profile card
+    const isHi = currentLang === 'hi';
     document.getElementById('profileGrid').innerHTML = `
-      <div class="profile-item"><label>From</label><p>${profile.origin_state || 'Unknown'}</p></div>
-      <div class="profile-item"><label>Working In</label><p>${profile.current_state || 'Unknown'}</p></div>
-      <div class="profile-item"><label>Months Here</label><p>${profile.months_in_current_state || 0}</p></div>
-      <div class="profile-item"><label>Monthly Income</label><p>₹${Number(profile.monthly_income || 0).toLocaleString()}</p></div>
-      <div class="profile-item"><label>Family Size</label><p>${profile.family_size || 1} member${(profile.family_size || 1) > 1 ? 's' : ''}</p></div>
-      <div class="profile-item"><label>Documents</label><p>${(profile.existing_documents || []).join(', ') || 'None stated'}</p></div>
-    `;
+      <div class="profile-item"><label>${isHi?'मूल राज्य':'From'}</label><p>${profile.origin_state||'Unknown'}</p></div>
+      <div class="profile-item"><label>${isHi?'कार्यस्थल':'Working In'}</label><p>${profile.current_state||'Unknown'}</p></div>
+      <div class="profile-item"><label>${isHi?'यहाँ महीने':'Months Here'}</label><p>${profile.months_in_current_state||0}</p></div>
+      <div class="profile-item"><label>${isHi?'मासिक आय':'Monthly Income'}</label><p>₹${Number(profile.monthly_income||0).toLocaleString()}</p></div>
+      <div class="profile-item"><label>${isHi?'परिवार का आकार':'Family Size'}</label><p>${profile.family_size||1} ${isHi?'सदस्य':'member'}${(profile.family_size||1)>1&&!isHi?'s':''}</p></div>
+      <div class="profile-item"><label>${isHi?'दस्तावेज़':'Documents'}</label><p>${(profile.existing_documents||[]).join(', ')||(isHi?'कोई नहीं':'None stated')}</p></div>`;
     show('profileCard');
-
-    // Rupee counter with animation
-    const total = eligibility.total_monthly_benefit || 0;
-    const schemes = eligibility.eligible_schemes || [];
+    const total = eligibility.total_monthly_benefit||0, schemes = eligibility.eligible_schemes||[];
     animateCounter(total);
-    document.getElementById('rupeeLabel').textContent =
-      `unclaimed every month across ${schemes.length} scheme${schemes.length !== 1 ? 's' : ''}`;
-    document.getElementById('priorityBox').textContent =
-      eligibility.priority_action ? `🎯 Do this first: ${eligibility.priority_action}` : '';
-    document.getElementById('hindiSummary').textContent = eligibility.hindi_summary || '';
+    document.getElementById('rupeeLabel').textContent = isHi
+      ? `${schemes.length} योजनाओं में हर महीने अदावा न किया गया`
+      : `unclaimed every month across ${schemes.length} scheme${schemes.length!==1?'s':''}`;
+    document.getElementById('priorityBox').textContent = eligibility.priority_action ? `🎯 ${isHi?'पहले यह करें: ':'Do this first: '}${eligibility.priority_action}` : '';
+    document.getElementById('hindiSummary').textContent = eligibility.hindi_summary||'';
     show('rupeeCounter');
-
-    // Contractor alert
     if (eligibility.contractor_violation) show('contractorAlert');
-
-    // Eligible schemes
     if (schemes.length > 0) {
       document.getElementById('schemesSection').classList.add('visible');
-      document.getElementById('schemesList').innerHTML = schemes.map((s, i) => `
-        <div class="scheme-card ${s.urgency || 'medium'}">
+      document.getElementById('schemesList').innerHTML = schemes.map((s,i) => `
+        <div class="scheme-card ${s.urgency||'medium'}">
           <div class="scheme-header">
-            <div class="scheme-name">${i + 1}. ${s.scheme_name}</div>
+            <div class="scheme-name">${i+1}. ${s.scheme_name}</div>
             <div class="badge-row">
-              <span class="confidence-badge ${s.confidence || 'MEDIUM'}">${s.confidence || 'MEDIUM'}</span>
-              <span class="urgency-badge ${s.urgency || 'medium'}">${s.urgency || 'medium'}</span>
+              <span class="confidence-badge ${s.confidence||'MEDIUM'}">${s.confidence||'MEDIUM'}</span>
+              <span class="urgency-badge ${s.urgency||'medium'}">${s.urgency||'medium'}</span>
             </div>
           </div>
           <p class="scheme-reason">✅ ${s.reason}</p>
           <div class="scheme-details">
-            <div class="detail-box">
-              <label>What to do</label>
-              <p>${s.action || '—'}</p>
-            </div>
-            <div class="detail-box">
-              <label>Documents needed</label>
-              <p>${(s.documents_needed || []).join(', ') || '—'}</p>
-            </div>
+            <div class="detail-box"><label>${isHi?'क्या करें':'What to do'}</label><p>${s.action||'—'}</p></div>
+            <div class="detail-box"><label>${isHi?'ज़रूरी दस्तावेज़':'Documents needed'}</label><p>${(s.documents_needed||[]).join(', ')||'—'}</p></div>
           </div>
-          ${s.deadline ? `<div class="deadline-line">⏰ Deadline: ${s.deadline}</div>` : ''}
-          ${s.source_citation ? `<p class="source-line">📎 Source: ${s.source_citation}${s.source_url ? ` — <a href="${s.source_url}" target="_blank">${s.source_url}</a>` : ''}</p>` : ''}
-        </div>
-      `).join('');
+          ${s.deadline?`<div class="deadline-line">⏰ ${isHi?'अंतिम तिथि':'Deadline'}: ${s.deadline}</div>`:''}
+          ${s.source_citation?`<p class="source-line">📎 ${isHi?'स्रोत':'Source'}: ${s.source_citation}${s.source_url?` — <a href="${s.source_url}" target="_blank">${s.source_url}</a>`:''}</p>`:''}
+        </div>`).join('');
     }
-
-    // Ineligible schemes
-    const ineligible = eligibility.ineligible_schemes || [];
+    const ineligible = eligibility.ineligible_schemes||[];
     if (ineligible.length > 0) {
-      document.getElementById('ineligibleList').innerHTML = ineligible.map(s => `
-        <div class="ineligible-item"><span class="x">✗</span><span>${s.scheme_name} — ${s.reason}</span></div>
-      `).join('');
+      document.getElementById('ineligibleList').innerHTML = ineligible.map(s =>
+        `<div class="ineligible-item"><span class="x">✗</span><span>${s.scheme_name} — ${s.reason}</span></div>`).join('');
       show('ineligibleSection');
     }
-
-    // Scroll to results
-    document.getElementById('reasoningTrace').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('reasoningTrace').scrollIntoView({ behavior:'smooth', block:'start' });
   }
 
   function animateCounter(target) {
     const el = document.getElementById('rupeeAmount');
-    let current = 0;
-    const step = Math.ceil(target / 40);
-    const timer = setInterval(() => {
-      current = Math.min(current + step, target);
-      el.textContent = '₹' + current.toLocaleString() + '/month';
-      if (current >= target) clearInterval(timer);
-    }, 40);
+    let cur = 0; const step = Math.ceil(target/40);
+    const t = setInterval(() => { cur = Math.min(cur+step,target); el.textContent = '₹'+cur.toLocaleString()+'/month'; if(cur>=target) clearInterval(t); }, 40);
   }
 
-  // ── Chat mode ────────────────────────────────────────────────────────────
   async function startChat() {
-    chatHistory = [];
-    profileSoFar = {};
-    updateProgressDots({});
-
+    chatHistory=[]; chatLog=[]; profileSoFar={}; updateProgressDots({});
+    document.getElementById('chatMessages').innerHTML='';
     try {
-      const res = await fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ history: [], profile_so_far: {} })
-      });
+      const res = await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({history:[],profile_so_far:{}})});
       const data = await res.json();
-      if (data.question_hindi) {
-        addMessage('agent', data.question_hindi, data.question_english);
-        chatHistory.push({ role: 'assistant', content: data.question_hindi });
+      if(data.question_hindi){addMessage('agent',data.question_hindi,data.question_english);chatHistory.push({role:'assistant',content:data.question_hindi});}
+    } catch(e){ addMessage('agent','नमस्ते! आप क्या काम करते हैं?','Hello! What work do you do?'); }
+  }
+
+  // Stores every chat turn as a {hindi, english} pair so switching the language
+  // toggle re-renders the whole conversation in that language only —
+  // no mixed / romanized text ever shown.
+  function addMessage(role,hindi,english){
+    chatLog.push({role,hindi,english});
+    renderChatLog();
+    // Read the newly added agent/system message aloud, in whichever language is displayed.
+    if(role==='agent' || role==='system-msg'){
+      speakText(displayTextFor(chatLog[chatLog.length-1]));
+    }
+    spokenCount = chatLog.length;
+  }
+
+  function displayTextFor(entry){
+    if(entry.role==='user') return entry.hindi;
+    return currentLang==='hi' ? (entry.hindi||entry.english||'') : (entry.english||entry.hindi||'');
+  }
+
+  function renderChatLog(){
+    const msgs=document.getElementById('chatMessages');
+    msgs.innerHTML='';
+    chatLog.forEach(entry=>{
+      const row=document.createElement('div');
+      const text = displayTextFor(entry);
+      if(entry.role==='agent'){
+        row.className='msg-row agent-row';
+        row.innerHTML=`<div class="avatar agent">🤖</div><div class="msg agent"></div>`;
+        row.querySelector('.msg').textContent = text;
+      } else if(entry.role==='user'){
+        row.className='msg-row user';
+        row.innerHTML=`<div class="avatar user">🧑</div><div class="msg user"></div>`;
+        row.querySelector('.msg').textContent = text;
+      } else {
+        row.className='msg-row system-row';
+        row.innerHTML=`<div class="msg system-msg"></div>`;
+        row.querySelector('.msg').textContent = text;
       }
-    } catch(err) {
-      addMessage('agent', 'Namaste! Aap kya kaam karte hain?', 'Hello! What work do you do?');
+      msgs.appendChild(row);
+    });
+    msgs.scrollTop=msgs.scrollHeight;
+  }
+
+  // ── Voice assistant (text-to-speech) ──
+  function speakText(text){
+    if(!voiceAssistantEnabled || !text) return;
+    if(!('speechSynthesis' in window)) return;
+    try{
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text.replace(/<[^>]+>/g,' '));
+      utter.lang = currentLang==='hi' ? 'hi-IN' : 'en-IN';
+      utter.rate = 0.95;
+      window.speechSynthesis.speak(utter);
+    }catch(e){ /* speech synthesis not available — fail silently */ }
+  }
+
+  function toggleVoiceAssistant(){
+    voiceAssistantEnabled = !voiceAssistantEnabled;
+    const btn = document.getElementById('voiceToggleBtn');
+    if(btn) btn.textContent = voiceAssistantEnabled ? '🔊' : '🔇';
+    if(!voiceAssistantEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+  }
+
+  function updateProgressDots(p){
+    document.getElementById('dot-occupation').classList.toggle('filled',!!p.occupation);
+    document.getElementById('dot-state').classList.toggle('filled',!!p.current_state);
+    document.getElementById('dot-months').classList.toggle('filled',p.months_in_current_state!=null);
+    document.getElementById('dot-income').classList.toggle('filled',p.monthly_income!=null);
+  }
+
+  async function sendChat(){
+    if(isSending) return; // guard against overlapping sends (e.g. voice auto-send firing twice)
+    const input=document.getElementById('chatInput'),text=input.value.trim();
+    if(!text)return; input.value='';
+    isSending = true;
+    addMessage('user',text); chatHistory.push({role:'user',content:text});
+    input.disabled=true; document.querySelector('.btn-send').disabled=true;
+    try{
+      const res=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({history:chatHistory,profile_so_far:profileSoFar})});
+      const data=await res.json();
+      if(data.updated_profile&&Object.keys(data.updated_profile).length>0){profileSoFar={...profileSoFar,...data.updated_profile};updateProgressDots(profileSoFar);}
+      if(data.profile_complete){
+        if(data.question_hindi){addMessage('agent',data.question_hindi,data.question_english||null);chatHistory.push({role:'assistant',content:data.question_hindi});}
+        addMessage('system-msg','⟳ सरकारी योजनाओं के विरुद्ध पात्रता जाँच रहे हैं...','⟳ Checking eligibility against government schemes...');
+        const fullText=chatHistory.filter(m=>m.role==='user').map(m=>m.content).join('. ');
+        setTimeout(async()=>{startSpinner();try{const r=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:fullText})});const res=await r.json();stopSpinner();renderResults(res);}catch(e){stopSpinner();addMessage('agent','विश्लेषण में समस्या आई। कृपया दोबारा प्रयास करें।','Analysis failed. Please try again.');}},600);
+      } else if(data.question_hindi){addMessage('agent',data.question_hindi,data.question_english);chatHistory.push({role:'assistant',content:data.question_hindi});}
+    }catch(e){addMessage('agent','कुछ गलत हो गया। कृपया दोबारा प्रयास करें।','Something went wrong. Please try again.');}
+    finally{isSending=false;input.disabled=false;document.querySelector('.btn-send').disabled=false;input.focus();}
+  }
+
+  function setMicState(id,rec){document.getElementById(id).classList.toggle('recording',rec);}
+
+  function noSpeechSupportAlert(){
+    alert(currentLang==='hi'
+      ? 'यह ब्राउज़र आवाज़ पहचान का समर्थन नहीं करता। कृपया Chrome या Edge ब्राउज़र का उपयोग करें।'
+      : 'Voice input is not supported in this browser. Please use Chrome or Edge.');
+  }
+
+  function getSpeechRecognizer(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR) return null;
+    const r = new SR();
+    // Follow whichever language mode is active: Hindi speech in हि mode, English speech in EN mode.
+    r.lang = currentLang==='hi' ? 'hi-IN' : 'en-IN';
+    r.continuous = true;        // keep listening across natural pauses — don't cut off after a few words
+    r.interimResults = true;
+    r.maxAlternatives = 1;
+    return r;
+  }
+
+  // Quick Analysis mode: tap mic to start, speak freely (pauses are fine), tap again to stop.
+  // The textarea keeps filling in as you talk; nothing is auto-submitted.
+  function toggleRecording(){
+    if('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if(isVoiceRecording){
+      workerStopRequested = true;
+      recognition && recognition.stop();
+      return;
     }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){ noSpeechSupportAlert(); return; }
+    workerStopRequested = false;
+    workerTranscript = document.getElementById('workerInput').value.trim();
+    if(workerTranscript) workerTranscript += ' ';
+    startWorkerRecognition();
   }
 
-  function addMessage(role, hindi, english) {
-    const msgs = document.getElementById('chatMessages');
-    const div = document.createElement('div');
-    div.className = `msg ${role}`;
-    if (role === 'agent') {
-      div.innerHTML = `<div class="hindi">${hindi}</div>${english ? `<div class="english">${english}</div>` : ''}`;
-    } else if (role === 'system-msg') {
-      div.textContent = hindi;
-    } else {
-      div.textContent = hindi;
+  function startWorkerRecognition(){
+    recognition = getSpeechRecognizer();
+    const box = document.getElementById('workerInput');
+    const hint = document.getElementById('listeningHint');
+    isVoiceRecording = true; setMicState('micBtn', true); hint.classList.add('visible');
+    recognition.onresult = (e) => {
+      let interim='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const t=e.results[i][0].transcript;
+        if(e.results[i].isFinal) workerTranscript += t + ' '; else interim+=t;
+      }
+      box.value = (workerTranscript + interim).trim();
+    };
+    recognition.onerror = (e) => {
+      if(e.error==='not-allowed' || e.error==='service-not-allowed' || e.error==='audio-capture'){
+        workerStopRequested = true;
+        alert(currentLang==='hi'?'माइक्रोफ़ोन की अनुमति नहीं मिली।':'Microphone permission was denied.');
+      } else if(e.error!=='no-speech' && e.error!=='aborted'){
+        // transient network hiccup etc. — let onend decide whether to restart
+      }
+    };
+    recognition.onend = () => {
+      if(workerStopRequested){
+        isVoiceRecording=false; setMicState('micBtn',false); hint.classList.remove('visible');
+      } else {
+        // ended on its own (silence timeout) but the person hasn't tapped stop — keep listening
+        try{ startWorkerRecognition(); }catch(err){ isVoiceRecording=false; setMicState('micBtn',false); hint.classList.remove('visible'); }
+      }
+    };
+    try { recognition.start(); } catch(e){ isVoiceRecording=false; setMicState('micBtn',false); hint.classList.remove('visible'); }
+  }
+
+  // Interview mode: tap mic to start, speak freely, tap again to stop — only THEN is the
+  // fully transcribed answer sent to the chat, so a natural pause mid-sentence never cuts you off.
+  function toggleRecordingChat(){
+    if('speechSynthesis' in window) window.speechSynthesis.cancel();
+    if(isVoiceRecordingChat){
+      chatStopRequested = true;
+      recognition && recognition.stop();
+      return;
     }
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){ noSpeechSupportAlert(); return; }
+    chatStopRequested = false;
+    chatTranscript = '';
+    startChatRecognition();
   }
 
-  function updateProgressDots(profile) {
-    document.getElementById('dot-occupation').classList.toggle('filled', !!profile.occupation);
-    document.getElementById('dot-state').classList.toggle('filled', !!profile.current_state);
-    document.getElementById('dot-months').classList.toggle('filled', profile.months_in_current_state != null);
-    document.getElementById('dot-income').classList.toggle('filled', profile.monthly_income != null);
-  }
-
-  async function sendChat() {
+  function startChatRecognition(){
+    recognition = getSpeechRecognizer();
     const input = document.getElementById('chatInput');
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = '';
-
-    addMessage('user', text);
-    chatHistory.push({ role: 'user', content: text });
-
-    // Disable input while waiting
-    input.disabled = true;
-    document.querySelector('.btn-send').disabled = true;
-
-    try {
-      const res = await fetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ history: chatHistory, profile_so_far: profileSoFar })
-      });
-      const data = await res.json();
-
-      // Update profile
-      if (data.updated_profile && Object.keys(data.updated_profile).length > 0) {
-        profileSoFar = { ...profileSoFar, ...data.updated_profile };
-        updateProgressDots(profileSoFar);
+    const hint = document.getElementById('listeningHintChat');
+    isVoiceRecordingChat = true; setMicState('micBtnChat', true); hint.classList.add('visible');
+    recognition.onresult = (e) => {
+      let interim='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        const t=e.results[i][0].transcript;
+        if(e.results[i].isFinal) chatTranscript += t + ' '; else interim+=t;
       }
-
-      if (data.profile_complete) {
-        // Show closing message from AI
-        if (data.question_hindi) {
-          addMessage('agent', data.question_hindi, null);
-          chatHistory.push({ role: 'assistant', content: data.question_hindi });
-        }
-
-        // Add system message
-        addMessage('system-msg', '⟳ Checking eligibility against government schemes...', null);
-
-        // Run analysis in the background, show results below chat
-        const fullText = chatHistory
-          .filter(m => m.role === 'user')
-          .map(m => m.content)
-          .join('. ');
-
-        setTimeout(async () => {
-          startSpinner();
-          try {
-            const res2 = await fetch('/analyze', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: fullText })
-            });
-            const result = await res2.json();
-            stopSpinner();
-            renderResults(result);
-          } catch(err) {
-            stopSpinner();
-            addMessage('agent', 'Analysis mein dikkat aayi. Quick Analysis tab mein try karein.', 'Analysis failed. Please try the Quick Analysis tab.');
-          }
-        }, 600);
-
-      } else if (data.question_hindi) {
-        addMessage('agent', data.question_hindi, data.question_english);
-        chatHistory.push({ role: 'assistant', content: data.question_hindi });
+      input.value = (chatTranscript + interim).trim();
+    };
+    recognition.onerror = (e) => {
+      if(e.error==='not-allowed' || e.error==='service-not-allowed' || e.error==='audio-capture'){
+        chatStopRequested = true;
+        alert(currentLang==='hi'?'माइक्रोफ़ोन की अनुमति नहीं मिली।':'Microphone permission was denied.');
+      } else if(e.error!=='no-speech' && e.error!=='aborted'){
+        // transient network hiccup etc. — let onend decide whether to restart
       }
-
-    } catch(err) {
-      console.error('Chat error:', err);
-      addMessage('agent', 'Kuch galat hua. Dobara try karein.', 'Something went wrong. Please try again.');
-    } finally {
-      input.disabled = false;
-      document.querySelector('.btn-send').disabled = false;
-      input.focus();
-    }
+    };
+    recognition.onend = () => {
+      if(chatStopRequested){
+        isVoiceRecordingChat=false; setMicState('micBtnChat',false); hint.classList.remove('visible');
+        const text = input.value.trim();
+        chatTranscript='';
+        if(text) sendChat();
+      } else {
+        // ended on its own (silence timeout) but the person hasn't tapped stop — keep listening
+        try{ startChatRecognition(); }catch(err){ isVoiceRecordingChat=false; setMicState('micBtnChat',false); hint.classList.remove('visible'); }
+      }
+    };
+    try { recognition.start(); } catch(e){ isVoiceRecordingChat=false; setMicState('micBtnChat',false); hint.classList.remove('visible'); }
   }
 
-  // ── Voice recording ──────────────────────────────────────────────────────
-  async function toggleRecording() {
-    if (isRecording) {
-      mediaRecorder.stop();
-      isRecording = false;
-      document.getElementById('micBtn').classList.remove('recording');
-      document.getElementById('micBtn').textContent = '🎤';
-    } else {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        mediaRecorder.onstop = async () => {
-          const blob = new Blob(audioChunks, { type: 'audio/webm' });
-          const formData = new FormData();
-          formData.append('audio', blob, 'recording.webm');
-          try {
-            const res = await fetch('/transcribe', { method: 'POST', body: formData });
-            const data = await res.json();
-            if (data.text) document.getElementById('workerInput').value = data.text;
-          } catch(e) { alert('Transcription failed: ' + e.message); }
-        };
-        mediaRecorder.start();
-        isRecording = true;
-        document.getElementById('micBtn').classList.add('recording');
-        document.getElementById('micBtn').textContent = '⏹';
-      } catch(e) { alert('Microphone access denied. Please allow microphone permission.'); }
-    }
-  }
-
-  async function toggleRecordingChat() {
-    if (isRecording) {
-      mediaRecorder.stop();
-      isRecording = false;
-      document.getElementById('micBtnChat').classList.remove('recording');
-      document.getElementById('micBtnChat').textContent = '🎤';
-    } else {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        mediaRecorder.onstop = async () => {
-          const blob = new Blob(audioChunks, { type: 'audio/webm' });
-          const formData = new FormData();
-          formData.append('audio', blob, 'recording.webm');
-          try {
-            const res = await fetch('/transcribe', { method: 'POST', body: formData });
-            const data = await res.json();
-            if (data.text) {
-              document.getElementById('chatInput').value = data.text;
-              sendChat();
-            }
-          } catch(e) { alert('Transcription failed'); }
-        };
-        mediaRecorder.start();
-        isRecording = true;
-        document.getElementById('micBtnChat').classList.add('recording');
-        document.getElementById('micBtnChat').textContent = '⏹';
-      } catch(e) { alert('Microphone access denied. Please allow microphone permission.'); }
-    }
-  }
-
-  // ── Complaint letter ─────────────────────────────────────────────────────
-  async function generateComplaint() {
-    try {
-      const res = await fetch('/generate-complaint', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: currentProfile.name || 'Worker',
-          months_in_current_state: currentProfile.months_in_current_state || 'several'
-        })
-      });
-      const data = await res.json();
-      if (data.url) window.open(data.url, '_blank');
-    } catch(e) {
-      alert('Could not generate complaint letter. Please try again.');
-    }
+  async function generateComplaint(){
+    try{const res=await fetch('/generate-complaint',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:currentProfile.name||'Worker',months_in_current_state:currentProfile.months_in_current_state||'several'})});const data=await res.json();if(data.url)window.open(data.url,'_blank');}
+    catch(e){alert('Could not generate complaint letter.');}
   }
 </script>
 </body>

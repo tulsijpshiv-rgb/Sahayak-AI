@@ -73,10 +73,12 @@ def schemes_to_text():
             f"{c['field']} {c['operator']} {c['value']}"
             for c in s.get("eligibility_conditions", [])
         )
+        docs = ", ".join(s.get("required_documents", []))
         lines.append(
             f"{s['name']}: {conds} | "
             f"Rs{s['monthly_benefit']}/mo | "
             f"{s['action']} | "
+            f"DOCS:{docs} | "
             f"SOURCE:{s['official_source']}"
         )
     return "\n".join(lines)
@@ -121,7 +123,7 @@ class ChatInput(BaseModel):
 
 @app.get("/")
 def root():
-    return FileResponse(os.path.join(BASE_DIR, "index.html"))
+    return FileResponse(os.path.join(BASE_DIR, "..", "frontend", "index.html"))
 
 @app.get("/schemes")
 def get_schemes():
@@ -206,10 +208,12 @@ def analyze(input: TextInput):
                         "SCHEMES:\n" + schemes_text + "\n\n"
                         "WORKER: " + json.dumps(profile) + "\n\n"
                         "Check eligibility for each scheme. "
+                        "For each eligible scheme, copy its DOCS list into documents_needed.\n"
                         "contractor_violation=true if construction worker AND contractor_registered_bocw=false.\n"
                         "Return ONLY this JSON structure:\n"
                         '{"eligible_schemes":[{"scheme_name":"","reason":"","monthly_benefit":0,'
-                        '"action":"","urgency":"high","confidence":"HIGH","source_citation":""}],'
+                        '"action":"","urgency":"high","confidence":"HIGH","source_citation":"",'
+                        '"documents_needed":[]}],'
                         '"ineligible_schemes":[{"scheme_name":"","reason":""}],'
                         '"total_monthly_benefit":0,"priority_action":"","contractor_violation":false,'
                         '"hindi_summary":""}'
@@ -386,3 +390,4 @@ def generate_complaint(profile: dict):
     except Exception as e:
         print(f"COMPLAINT ERROR: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
+        
