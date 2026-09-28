@@ -31,14 +31,17 @@ REQUIRED_FIELDS = [
 ]
 
 FIELD_QUESTIONS = {
-    "occupation": ("Aap kaun sa kaam karte hain?", "What work do you do?"),
-    "current_state": ("Aap abhi kis state mein hain?", "Which state are you in?"),
-    "months_in_current_state": ("Kitne mahine se yahan hain?", "How many months here?"),
-    "monthly_income": ("Mahine ki kamai kitni hai?", "What is your monthly income?"),
-    "age": ("Aapki umar kitni hai?", "What is your age?"),
-    "gender": ("Aap purush hain ya mahila?", "Are you male or female?"),
-    "has_bank_account": ("Kya aapka bank account hai?", "Do you have a bank account?"),
-    "contractor_registered_bocw": ("Kya aapka thekedar aapko BOCW mein register karwa chuka hai?", "Has your contractor registered you under BOCW?"),
+    "occupation": ("आप कौन सा काम करते हैं?", "What work do you do?"),
+    "current_state": ("आप अभी किस राज्य में हैं?", "Which state are you in?"),
+    "months_in_current_state": ("आप यहाँ कितने महीनों से हैं?", "How many months have you been here?"),
+    "monthly_income": ("आपकी महीने की कमाई कितनी है?", "What is your monthly income?"),
+    "age": ("आपकी उम्र कितनी है?", "What is your age?"),
+    "gender": ("आप पुरुष हैं या महिला?", "Are you male or female?"),
+    "has_bank_account": ("क्या आपका बैंक खाता है?", "Do you have a bank account?"),
+    "contractor_registered_bocw": (
+        "क्या आपके ठेकेदार ने आपको BOCW में पंजीकृत किया है?",
+        "Has your contractor registered you under BOCW?"
+    ),
 }
 
 def get_missing_fields(profile: dict) -> list:
@@ -122,10 +125,6 @@ class ChatInput(BaseModel):
     history: list[ChatMessage]
     profile_so_far: dict = {}
 
-class ComplaintInput(BaseModel):
-    name: str = "Worker"
-    months_in_current_state: str = "several"
-
 @app.get("/")
 def root():
     return FileResponse(os.path.join(BASE_DIR, "..", "frontend", "index.html"))
@@ -148,7 +147,7 @@ def test_model():
 @app.post("/analyze")
 def analyze(input: TextInput):
 
-    # Step 1: Extract profile
+    # ── Step 1: Extract profile ───────────────────────────────────────────────
     profile = {}
     for attempt in range(3):
         try:
@@ -191,7 +190,7 @@ def analyze(input: TextInput):
                 )
             time.sleep(0.5)
 
-    # Step 2: Check eligibility
+    # ── Step 2: Check eligibility ─────────────────────────────────────────────
     schemes_text = schemes_to_text()
 
     for attempt in range(3):
@@ -354,7 +353,7 @@ async def transcribe(audio: UploadFile = File(...)):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 @app.post("/generate-complaint")
-def generate_complaint(profile: ComplaintInput):
+def generate_complaint(profile: dict):
     try:
         from reportlab.pdfgen import canvas
         from reportlab.lib.pagesizes import A4
@@ -372,8 +371,12 @@ def generate_complaint(profile: ComplaintInput):
         c.drawString(50, height - 130, "Bengaluru Urban District")
         c.drawString(50, height - 170, "Subject: Non-registration under BOCW Act 1996")
         c.drawString(50, height - 210, "Respected Sir/Madam,")
-        c.drawString(50, height - 240, f"I, {profile.name}, a construction worker in Bengaluru, Karnataka,")
-        c.drawString(50, height - 260, f"have been working here for {profile.months_in_current_state} months.")
+
+        worker_name = profile.get("name", "[Worker Name]")
+        months = profile.get("months_in_current_state", "[X]")
+
+        c.drawString(50, height - 240, f"I, {worker_name}, a construction worker in Bengaluru, Karnataka,")
+        c.drawString(50, height - 260, f"have been working here for {months} months.")
         c.drawString(50, height - 290, "My contractor has not registered me under the BOCW Welfare Board.")
         c.drawString(50, height - 330, "Legal basis: Section 7, BOCW Act 1996.")
         c.drawString(50, height - 350, "Penalty for non-compliance: up to Rs 1,00,000.")
@@ -382,19 +385,13 @@ def generate_complaint(profile: ComplaintInput):
         c.drawString(50, height - 430, "2. My registration under Karnataka BOCW Welfare Board.")
         c.drawString(50, height - 450, "3. Access to benefits I am legally entitled to.")
         c.drawString(50, height - 490, "Yours faithfully,")
-        c.drawString(50, height - 520, profile.name)
+        c.drawString(50, height - 520, worker_name)
         c.drawString(50, height - 540, f"Date: {time.strftime('%d/%m/%Y')}")
         c.drawString(50, height - 560, "Place: Bengaluru, Karnataka")
         c.save()
 
-        return {"filename": filename, "url": "/complaint_letter.pdf"}
+        return {"filename": filename, "url": f"/{filename}"}
     except Exception as e:
         print(f"COMPLAINT ERROR: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
-
-@app.get("/complaint_letter.pdf")
-def serve_complaint():
-    filepath = os.path.join(BASE_DIR, "complaint_letter.pdf")
-    if os.path.exists(filepath):
-        return FileResponse(filepath, media_type="application/pdf", filename="complaint_letter.pdf")
-    return JSONResponse(status_code=404, content={"error": "Complaint letter not generated yet. Please click the Generate Complaint Letter button first."})
+        
