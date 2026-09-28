@@ -122,6 +122,10 @@ class ChatInput(BaseModel):
     history: list[ChatMessage]
     profile_so_far: dict = {}
 
+class ComplaintInput(BaseModel):
+    name: str = "Worker"
+    months_in_current_state: str = "several"
+
 @app.get("/")
 def root():
     return FileResponse(os.path.join(BASE_DIR, "..", "frontend", "index.html"))
@@ -144,7 +148,7 @@ def test_model():
 @app.post("/analyze")
 def analyze(input: TextInput):
 
-    # ── Step 1: Extract profile ───────────────────────────────────────────────
+    # Step 1: Extract profile
     profile = {}
     for attempt in range(3):
         try:
@@ -187,7 +191,7 @@ def analyze(input: TextInput):
                 )
             time.sleep(0.5)
 
-    # ── Step 2: Check eligibility ─────────────────────────────────────────────
+    # Step 2: Check eligibility
     schemes_text = schemes_to_text()
 
     for attempt in range(3):
@@ -350,7 +354,7 @@ async def transcribe(audio: UploadFile = File(...)):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 @app.post("/generate-complaint")
-def generate_complaint(profile: dict):
+def generate_complaint(profile: ComplaintInput):
     try:
         from reportlab.pdfgen import canvas
         from reportlab.lib.pagesizes import A4
@@ -368,12 +372,8 @@ def generate_complaint(profile: dict):
         c.drawString(50, height - 130, "Bengaluru Urban District")
         c.drawString(50, height - 170, "Subject: Non-registration under BOCW Act 1996")
         c.drawString(50, height - 210, "Respected Sir/Madam,")
-
-        worker_name = profile.get("name", "[Worker Name]")
-        months = profile.get("months_in_current_state", "[X]")
-
-        c.drawString(50, height - 240, f"I, {worker_name}, a construction worker in Bengaluru, Karnataka,")
-        c.drawString(50, height - 260, f"have been working here for {months} months.")
+        c.drawString(50, height - 240, f"I, {profile.name}, a construction worker in Bengaluru, Karnataka,")
+        c.drawString(50, height - 260, f"have been working here for {profile.months_in_current_state} months.")
         c.drawString(50, height - 290, "My contractor has not registered me under the BOCW Welfare Board.")
         c.drawString(50, height - 330, "Legal basis: Section 7, BOCW Act 1996.")
         c.drawString(50, height - 350, "Penalty for non-compliance: up to Rs 1,00,000.")
@@ -382,13 +382,19 @@ def generate_complaint(profile: dict):
         c.drawString(50, height - 430, "2. My registration under Karnataka BOCW Welfare Board.")
         c.drawString(50, height - 450, "3. Access to benefits I am legally entitled to.")
         c.drawString(50, height - 490, "Yours faithfully,")
-        c.drawString(50, height - 520, worker_name)
+        c.drawString(50, height - 520, profile.name)
         c.drawString(50, height - 540, f"Date: {time.strftime('%d/%m/%Y')}")
         c.drawString(50, height - 560, "Place: Bengaluru, Karnataka")
         c.save()
 
-        return {"filename": filename, "url": f"/{filename}"}
+        return {"filename": filename, "url": "/complaint_letter.pdf"}
     except Exception as e:
         print(f"COMPLAINT ERROR: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
-        
+
+@app.get("/complaint_letter.pdf")
+def serve_complaint():
+    filepath = os.path.join(BASE_DIR, "complaint_letter.pdf")
+    if os.path.exists(filepath):
+        return FileResponse(filepath, media_type="application/pdf", filename="complaint_letter.pdf")
+    return JSONResponse(status_code=404, content={"error": "Complaint letter not generated yet. Please click the Generate Complaint Letter button first."})
