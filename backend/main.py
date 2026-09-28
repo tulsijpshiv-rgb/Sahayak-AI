@@ -79,7 +79,8 @@ def schemes_to_text():
             f"Rs{s['monthly_benefit']}/mo | "
             f"{s['action']} | "
             f"DOCS:{docs} | "
-            f"SOURCE:{s['official_source']}"
+            f"SOURCE:{s['official_source']} | "
+            f"URL:{s.get('source_url','')}"
         )
     return "\n".join(lines)
 
@@ -213,7 +214,7 @@ def analyze(input: TextInput):
                         "Return ONLY this JSON structure:\n"
                         '{"eligible_schemes":[{"scheme_name":"","reason":"","monthly_benefit":0,'
                         '"action":"","urgency":"high","confidence":"HIGH","source_citation":"",'
-                        '"documents_needed":[]}],'
+                        '"source_url":"","documents_needed":[]}],'
                         '"ineligible_schemes":[{"scheme_name":"","reason":""}],'
                         '"total_monthly_benefit":0,"priority_action":"","contractor_violation":false,'
                         '"hindi_summary":""}'
